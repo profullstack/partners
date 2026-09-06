@@ -1,0 +1,43 @@
+{
+  "name": "@profullstack/partners",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Let the people whose work is in your dataset sell it. Signup, domain verification, niches, a commission rate that climbs, a payout address and earnings, as one Fetch-API handler you mount on your own auth.",
+  "keywords": [
+    "partners",
+    "affiliate",
+    "revenue-share",
+    "commission",
+    "onboarding",
+    "domain-verification",
+    "publishers",
+    "marketplace",
+    "x402",
+    "crawler",
+    "hono",
+    "nextjs"
+  ],
+  "repository": { "type": "git", "url": "git+https://github.com/profullstack/partners.git" },
+  "homepage": "https://github.com/profullstack/partners#readme",
+  "bugs": { "url": "https://github.com/profullstack/partners/issues" },
+  "license": "MIT",
+  "author": "Profullstack, LLC",
+  "exports": {
+    ".": { "types": "./index.d.ts", "import": "./src/index.js" },
+    "./hono": { "types": "./index.d.ts", "import": "./src/hono.js" },
+    "./next": { "types": "./index.d.ts", "import": "./src/next.js" },
+    "./verify": { "types": "./index.d.ts", "import": "./src/verify.js" },
+    "./store/memory": { "types": "./index.d.ts", "import": "./src/store/memory.js" },
+    "./store/sql": { "types": "./index.d.ts", "import": "./src/store/sql.js" }
+  },
+  "types": "./index.d.ts",
+  "files": ["src", "index.d.ts", "README.md", "LICENSE"],
+  "engines": { "node": ">=20.11" },
+  "sideEffects": false,
+  "dependencies": {
+    "@profullstack/leaderboard": "^0.3.1"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}
