@@ -32,7 +32,10 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      # No install step: this package has no dependencies.
+      # This package has one dependency (@profullstack/leaderboard), so unlike
+      # its zero-dependency siblings it does need an install before the tests.
+      - run: npm install --no-audit --no-fund
+
       - run: node --test
         env:
           CI: true
