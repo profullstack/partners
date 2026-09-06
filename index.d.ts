@@ -56,7 +56,8 @@ export interface PartnersOptions {
   secret: string;
   currentUser?: (request: Request) => Promise<HostUser | null> | HostUser | null;
   loginUrl?: string;
-  niches?: string[];
+  /** The niches a partner may claim. A function is resolved per request, for a vocabulary that lives in a database. */
+  niches?: string[] | (() => Promise<string[]> | string[]);
   ladder?: Ladder;
   prefix?: string;
   maxProperties?: number;
@@ -74,7 +75,7 @@ export interface Program {
   rateFor(partner: Partner, properties: Property[]): number;
   ladder: Ladder;
   basePath: string;
-  niches: string[];
+  niches(): Promise<string[]>;
   middleware(): (c: any, next: () => Promise<void>) => Promise<Response | void>;
 }
 

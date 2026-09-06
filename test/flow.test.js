@@ -180,3 +180,21 @@ test('a junk domain is refused with a usable message', async () => {
   const res = await post(p, '/sell/properties', { domain: 'localhost' });
   assert.match(decodeURIComponent(res.headers.get('location')), /does not look like a domain/);
 });
+
+test('niches may be a function, resolved per request', async () => {
+  let offered = ['ai'];
+  const { p, as } = program({ niches: () => offered });
+  as({ id: 'u1' });
+  await post(p, '/sell/apply');
+
+  await post(p, '/sell/niches', { niche: ['ai', 'quantum'] });
+  let me = await (await get(p, '/sell/me.json')).json();
+  assert.deepEqual(me.partner.niches, ['ai'], 'quantum is not offered yet');
+
+  // A niche added to the site today is claimable today, with no restart.
+  offered = ['ai', 'quantum'];
+  await post(p, '/sell/niches', { niche: ['ai', 'quantum'] });
+  me = await (await get(p, '/sell/me.json')).json();
+  assert.deepEqual(me.partner.niches, ['ai', 'quantum']);
+  assert.match(await (await get(p, '/sell/dashboard')).text(), /quantum/);
+});

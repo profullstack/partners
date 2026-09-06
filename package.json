@@ -1,6 +1,6 @@
 {
   "name": "@profullstack/partners",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Let the people whose work is in your dataset sell it. Signup, domain verification, niches, a commission rate that climbs, a payout address and earnings, as one Fetch-API handler you mount on your own auth.",
   "keywords": [

@@ -33,7 +33,14 @@ export function createPartners(options = {}) {
   const siteName = options.siteName ?? 'this dataset';
   const siteUrl = options.siteUrl ? trimSlash(options.siteUrl) : '';
   const ladder = options.ladder ?? commissionLadder();
-  const niches = (options.niches ?? []).map(String);
+  // An array, or a function returning one: a site's niche vocabulary usually
+  // lives in its database, and freezing it at import means a collection added
+  // today cannot be claimed today.
+  const nichesOption = options.niches ?? [];
+  const resolveNiches = async () => {
+    const list = typeof nichesOption === 'function' ? await safely(() => nichesOption()) : nichesOption;
+    return (Array.isArray(list) ? list : []).map(String);
+  };
   const loginUrl = options.loginUrl ?? '/login';
   const prefix = options.prefix ?? 'pfs-verify';
   const currentUser = options.currentUser ?? (() => null);
@@ -100,13 +107,15 @@ export function createPartners(options = {}) {
     // The pitch is public: it is the page that convinces someone to sign up.
     if (rest === '' && method === 'GET') {
       const ctx = user ? await contextFor(user) : { partner: null };
-      return html(landingPage({ siteName, basePath, ladder, loginUrl, user, partner: ctx.partner, niches, stats: await resolveStats() }));
+      return html(
+        landingPage({ siteName, basePath, ladder, loginUrl, user, partner: ctx.partner, niches: await resolveNiches(), stats: await resolveStats() }),
+      );
     }
 
     if (!user) {
       // Everything past the pitch is somebody's own money.
       if (method === 'GET') return redirect(loginUrl);
-      return html(landingPage({ siteName, basePath, ladder, loginUrl, user: null, partner: null, niches, stats: null }), 401);
+      return html(landingPage({ siteName, basePath, ladder, loginUrl, user: null, partner: null, niches: await resolveNiches(), stats: null }), 401);
     }
 
     if (rest === '/apply' && method === 'POST') {
@@ -131,7 +140,7 @@ export function createPartners(options = {}) {
           siteName, basePath, ladder, partner, prefix,
           properties: ctx.properties,
           earnings: ctx.earnings,
-          niches,
+          niches: await resolveNiches(),
           notice: url.searchParams.get('notice'),
           error: url.searchParams.get('error'),
         }),
@@ -184,7 +193,8 @@ export function createPartners(options = {}) {
 
     if (rest === '/niches' && method === 'POST') {
       const form = await formOf(request);
-      const chosen = [...new Set(form.getAll('niche').map(String))].filter((n) => niches.includes(n));
+      const offered = await resolveNiches();
+      const chosen = [...new Set(form.getAll('niche').map(String))].filter((n) => offered.includes(n));
       await store.updatePartner(partner.id, { niches: chosen });
       return redirect(`${basePath}/dashboard?notice=${encodeURIComponent('Niches saved.')}`);
     }
@@ -226,7 +236,7 @@ export function createPartners(options = {}) {
     rateFor,
     ladder,
     basePath,
-    niches,
+    niches: resolveNiches,
     /** Hono-shaped middleware, for the common case. */
     middleware() {
       return async (c, next) => {
